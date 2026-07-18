@@ -79,9 +79,9 @@ app.post('/api/expenses', validateRequest(expenseSchema), async (req, res) => {
 // GET /api/expenses
 // List expenses with pagination and optional filtering
 app.get('/api/expenses', async (req, res) => {
-  const { limit = 10, offset = 0, category_id, start_date, end_date } = req.query;
+  const { limit = 5, offset = 0, category_id, start_date, end_date } = req.query;
 
-  const parsedLimit = parseInt(limit, 10) || 10;
+  const parsedLimit = parseInt(limit, 10) || 5;
   const parsedOffset = parseInt(offset, 10) || 0;
   const parsedCategoryId = parseInt(category_id, 10);
 
