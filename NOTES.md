@@ -1,9 +1,9 @@
 1. Which parts did you build with AI assistance, and where did you have to correct, override, or rewrite what it produced?
-I used AI as an accelerator for boilerplate and syntax, specifically for generating the seed.sql file and initial React components. However, I had to perform few manual correction in two areas:
+I used AI as an accelerator for boilerplate and syntax, specifically for generating the seed.sql file and initial React components. However, I had to perform a few manual corrections in two areas:
 
-Security & Environment: The AI generated code that didn't include a .gitignore for sensitive files.
+Security & Environment: The AI-generated code didn't include a .gitignore for sensitive files.
 
-Code Organization & UI/UX: The AI initially suggested placing API calls directly inside my React components, which created messy, repetitive code. I overrode this by refactoring all network logic into a centralized api.js service file. Additionally, the AI's initial UI suggestions lacked UX depth; I had to override the layout to move beyond a cramped "everything-on-one-page" design, ensuring a more logical flow for user inputs and data display.
+Code Organisation & UI/UX: The AI initially suggested placing API calls directly inside my React components, which created messy, repetitive code. I overrode this by refactoring all network logic into a centralised api.js service file. Additionally, the AI's initial UI suggestions lacked UX depth; I had to override the layout to move beyond a cramped everything-on-one-page design, ensuring a more logical flow for user inputs and data display.
 
 2. Briefly describe your database schema and one tradeoff you made in designing it.
 The schema consists of two relational tables: categories and expenses, linked by a category_id foreign key.
@@ -20,7 +20,7 @@ Dashboard Aggregation: Running dynamic SUM() queries across a million rows on ev
 4. What did you deliberately simplify or leave out given the time limit, and why?
 Given the time constraints, I focused on core functionality rather than over-engineering the architecture:
 
-Architectural Patterns: I skipped a formal Model-Controller-Service (MVC) folder structure in favor of a flatter, more direct route-based approach to keep development velocity high.
+Architectural Patterns: I skipped a formal Model-Controller-Service (MVC) folder structure in favour of a flatter, more direct route-based approach to keep development velocity high.
 
 Authentication: I omitted a multi-tenant users table and login flows, focusing instead on building a robust, single-workspace dashboard.
 
