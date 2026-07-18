@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react-router-dom';
-import axios from 'axios';
-import { LayoutDashboard, Wallet, Receipt, Tag } from 'lucide-react';
+import { getSummary, getCategories } from './api';
+import { LayoutDashboard, Wallet, Receipt, Plus, Tag } from 'lucide-react';
 import SummaryCards from './components/SummaryCards';
 import ExpenseForm from './components/ExpenseForm';
 import ExpenseList from './components/ExpenseList';
 import CategoryManager from './components/CategoryManager';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import Modal from './components/Modal';
 
 function App() {
   const [summary, setSummary] = useState([]);
@@ -15,12 +14,16 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  // Modal states
+  const [isExpenseModalOpen, setExpenseModalOpen] = useState(false);
+  const [isCategoryModalOpen, setCategoryModalOpen] = useState(false);
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [summaryRes, categoriesRes] = await Promise.all([
-        axios.get(`${API_URL}/summary`),
-        axios.get(`${API_URL}/categories`)
+        getSummary(),
+        getCategories()
       ]);
       
       setSummary(summaryRes.data);
@@ -85,17 +88,6 @@ function App() {
                 <Receipt size={18} />
                 Expenses
               </NavLink>
-              <NavLink
-                to="/categories"
-                className={({ isActive }) =>
-                  `flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
-                    isActive ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                  }`
-                }
-              >
-                <Tag size={18} />
-                Categories
-              </NavLink>
             </nav>
           </header>
 
@@ -111,19 +103,52 @@ function App() {
                   <SummaryCards summary={summary} />
                 </div>
               } />
-              <Route path="/categories" element={
-                <div className="max-w-2xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <CategoryManager categories={categories} onCategoriesChanged={handleDataChanged} />
-                </div>
-              } />
               <Route path="/expenses" element={
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="lg:col-span-1 space-y-8">
-                    <ExpenseForm categories={categories} onExpenseAdded={handleDataChanged} />
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  {/* Action Bar */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/40 p-5 rounded-2xl border border-slate-700/50">
+                    <div>
+                      <h2 className="text-xl font-semibold text-slate-100">Expenses</h2>
+                      <p className="text-slate-400 text-sm mt-1">Manage and track your spending</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => setCategoryModalOpen(true)} 
+                        className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                      >
+                        <Tag size={18} />
+                        Manage Categories
+                      </button>
+                      <button 
+                        onClick={() => setExpenseModalOpen(true)} 
+                        className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-lg shadow-indigo-500/20"
+                      >
+                        <Plus size={18} />
+                        Add Expense
+                      </button>
+                    </div>
                   </div>
-                  <div className="lg:col-span-2">
-                    <ExpenseList categories={categories} refreshTrigger={refreshTrigger} onDataChanged={handleDataChanged} />
-                  </div>
+                  
+                  {/* Expense List Full Width */}
+                  <ExpenseList categories={categories} refreshTrigger={refreshTrigger} onDataChanged={handleDataChanged} />
+
+                  {/* Modals */}
+                  <Modal isOpen={isExpenseModalOpen} onClose={() => setExpenseModalOpen(false)}>
+                    <ExpenseForm 
+                      categories={categories} 
+                      onExpenseAdded={() => {
+                        handleDataChanged();
+                        setExpenseModalOpen(false);
+                      }} 
+                    />
+                  </Modal>
+
+                  <Modal isOpen={isCategoryModalOpen} onClose={() => setCategoryModalOpen(false)}>
+                    <CategoryManager 
+                      categories={categories} 
+                      onCategoriesChanged={handleDataChanged} 
+                    />
+                  </Modal>
                 </div>
               } />
             </Routes>

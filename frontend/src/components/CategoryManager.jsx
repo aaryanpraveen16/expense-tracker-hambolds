@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Tag, Trash2, Plus, AlertCircle } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { createCategory, deleteCategory } from '../api';
 
 const CategoryManager = ({ categories, onCategoriesChanged }) => {
   const [name, setName] = useState('');
@@ -17,7 +15,7 @@ const CategoryManager = ({ categories, onCategoriesChanged }) => {
     try {
       setLoading(true);
       setError(null);
-      await axios.post(`${API_URL}/categories`, {
+      await createCategory({
         name,
         monthly_budget: budget ? parseFloat(budget) : null
       });
@@ -38,7 +36,7 @@ const CategoryManager = ({ categories, onCategoriesChanged }) => {
     
     try {
       setLoading(true);
-      await axios.delete(`${API_URL}/categories/${id}`);
+      await deleteCategory(id);
       onCategoriesChanged();
     } catch (err) {
       setError('Failed to delete category');

@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
 import { FileText, Calendar, Tag, Edit2, Trash2, Check, X, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { getExpenses, updateExpense, deleteExpense } from '../api';
 
 const ExpenseList = ({ categories, refreshTrigger, onDataChanged }) => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(false);
   
   // Filtering & Pagination State
-  const [limit] = useState(10);
+  const [limit] = useState(5);
   const [offset, setOffset] = useState(0);
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStartDate, setFilterStartDate] = useState('');
@@ -27,7 +25,7 @@ const ExpenseList = ({ categories, refreshTrigger, onDataChanged }) => {
       if (filterStartDate) params.start_date = filterStartDate;
       if (filterEndDate) params.end_date = filterEndDate;
       
-      const res = await axios.get(`${API_URL}/expenses`, { params });
+      const res = await getExpenses(params);
       setExpenses(res.data);
     } catch (err) {
       console.error('Error fetching expenses:', err);
@@ -48,7 +46,7 @@ const ExpenseList = ({ categories, refreshTrigger, onDataChanged }) => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this expense?')) return;
     try {
-      await axios.delete(`${API_URL}/expenses/${id}`);
+      await deleteExpense(id);
       onDataChanged();
     } catch (err) {
       console.error('Error deleting expense:', err);
@@ -73,7 +71,7 @@ const ExpenseList = ({ categories, refreshTrigger, onDataChanged }) => {
 
   const saveEdit = async (id) => {
     try {
-      await axios.put(`${API_URL}/expenses/${id}`, {
+      await updateExpense(id, {
         amount: parseFloat(editForm.amount),
         description: editForm.description,
         date: editForm.date,

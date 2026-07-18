@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Plus, AlertCircle, CheckCircle2 } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { createExpense } from '../api';
 
 const ExpenseForm = ({ categories, onExpenseAdded }) => {
   const [formData, setFormData] = useState({
@@ -22,26 +20,34 @@ const ExpenseForm = ({ categories, onExpenseAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus({ type: '', message: '' });
-    setSubmitting(true);
-    
+
+    if (!formData.amount || formData.amount <= 0) {
+      setStatus({ type: 'error', message: 'Amount must be greater than zero' });
+      return;
+    }
+
     try {
-      await axios.post(`${API_URL}/expenses`, {
-        amount: Number(formData.amount),
-        description: formData.description,
-        date: formData.date,
-        category_id: formData.category_id ? Number(formData.category_id) : null
+      setSubmitting(true);
+      await createExpense({
+        ...formData,
+        amount: parseFloat(formData.amount),
+        category_id: formData.category_id ? parseInt(formData.category_id) : null
       });
       
       setStatus({ type: 'success', message: 'Expense added successfully!' });
-      setFormData(prev => ({ ...prev, amount: '', description: '' }));
+      setFormData({
+        amount: '',
+        description: '',
+        date: new Date().toISOString().split('T')[0],
+        category_id: ''
+      });
       
       if (onExpenseAdded) onExpenseAdded();
       
       setTimeout(() => setStatus({ type: '', message: '' }), 3000);
     } catch (err) {
       console.error(err);
-      const errorMsg = err.response?.data?.errors?.[0] || err.response?.data?.error || 'Failed to add expense';
-      setStatus({ type: 'error', message: errorMsg });
+      setStatus({ type: 'error', message: 'Failed to add expense. Please try again.' });
     } finally {
       setSubmitting(false);
     }
