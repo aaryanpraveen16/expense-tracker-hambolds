@@ -40,6 +40,24 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
+// DELETE /api/categories/:id
+// Delete a category
+app.delete('/api/categories/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query('DELETE FROM categories WHERE id = $1 RETURNING *', [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    res.json({ message: 'Category deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 // --- EXPENSE ENDPOINTS ---
 
 // POST /api/expenses
@@ -76,9 +94,9 @@ app.get('/api/expenses', async (req, res) => {
   const queryParams = [];
   let paramIndex = 1;
 
-  if (category_id) {
+  if (!isNaN(parsedCategoryId)) {
     query += ` AND expenses.category_id = $${paramIndex}`;
-    queryParams.push(category_id);
+    queryParams.push(parsedCategoryId);
     paramIndex++;
   }
 
